@@ -20,6 +20,9 @@ def transform(df):
 def save_silver(df, output_dir="data/silver"):
     df.write.mode("overwrite").parquet(output_dir)
 
+
+
+
 if __name__ == "__main__":
     spark = create_spark_session()
     df = load_bronze(spark)
