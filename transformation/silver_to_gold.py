@@ -1,5 +1,5 @@
 # transformation/silver_to_gold.py
-
+import json
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
@@ -52,6 +52,27 @@ def gold_trafic_vacances(df_trafic, df_vacances):
     
     return df
 
+
+def load_meteo(spark, meteo_path="data/meteo/meteo.json"):
+    with open(meteo_path) as f:
+        raw = json.load(f)
+    
+    hourly = raw["hourly"]
+    rows = list(zip(hourly["time"], hourly["temperature_2m"], hourly["precipitation"], hourly["windspeed_10m"]))
+    
+    return spark.createDataFrame(rows, ["time", "temperature", "precipitation", "vent"])
+
+def gold_trafic_meteo(df_trafic, df_meteo):
+    df_meteo = df_meteo.withColumn("time", F.to_timestamp("time"))
+    
+    return df_trafic.join(df_meteo, 
+        F.date_trunc("hour", df_trafic["t_1h"]) == F.date_trunc("hour", df_meteo["time"]),
+        "left"
+    ).groupBy("temperature", "precipitation") \
+     .agg(F.avg("q").alias("debit_moyen")) \
+     .orderBy("precipitation")
+
+
 if __name__ == "__main__":
     spark = create_spark_session()
     df = load_silver(spark)
@@ -68,3 +89,8 @@ if __name__ == "__main__":
     trafic_vacances = gold_trafic_vacances(df, df_vacances)
     save_gold(trafic_vacances, "trafic_vacances")
     print(f"OK — trafic_vacances: {trafic_vacances.count()} lignes")
+
+    df_meteo = load_meteo(spark)
+    trafic_meteo = gold_trafic_meteo(df, df_meteo)
+    save_gold(trafic_meteo, "trafic_meteo")
+    print(f"OK — trafic_meteo: {trafic_meteo.count()} lignes")
