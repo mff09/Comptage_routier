@@ -7,6 +7,9 @@ API_URL = "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/comptages
 
 
 def fetch_traffic_data(limit=100, date=None):
+    """
+    Récupère les données de trafic pour une date donnée
+    """
     if date is None:
         date = datetime.now().strftime("%Y/%m/%d")
     
@@ -27,6 +30,9 @@ def fetch_traffic_data(limit=100, date=None):
 
 
 def save_locally(data, output_dir="data/raw"):
+    """
+    Sauvegarde les données de trafic localement
+    """
     os.makedirs(output_dir, exist_ok=True)
     
     filename = f"traffic_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"

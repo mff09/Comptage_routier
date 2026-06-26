@@ -5,6 +5,9 @@ import os
 API_URL = "https://api.open-meteo.com/v1/forecast"
 
 def fetch_meteo(lat=48.8566, lon=2.3522, days=7):
+    """
+    Récupère les données météo qui nous interessent pour Paris 
+    """
     # Paris par défaut
     params = {
         "latitude": lat,
@@ -22,6 +25,9 @@ def fetch_meteo(lat=48.8566, lon=2.3522, days=7):
         raise Exception(f"Erreur API: {response.status_code}")
 
 def save_locally(data, output_dir="data/meteo"):
+    """
+    Sauvegarde les données météo localement
+    """
     os.makedirs(output_dir, exist_ok=True)
     filepath = os.path.join(output_dir, "meteo.json")
     with open(filepath, "w") as f:
